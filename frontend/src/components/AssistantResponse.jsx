@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -11,7 +11,7 @@ import {
   Button
 } from '@mui/material';
 import { CpuChipIcon } from '@heroicons/react/24/solid';
-import { 
+import {
   ClipboardDocumentIcon,
   CheckIcon,
   ClockIcon,
@@ -20,8 +20,10 @@ import {
 } from '@heroicons/react/24/outline';
 import AnswerPanel from './AnswerPanel';
 import SourcesPanel from './SourcesPanel';
+import FollowUpSuggestions from './FollowUpSuggestions';
+import AnswerContext from './AnswerContext';
 
-const AssistantResponse = ({ response, onRegenerate }) => {
+const AssistantResponse = ({ response, onRegenerate, onFollowUpClick }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [copied, setCopied] = useState(false);
 
@@ -34,6 +36,55 @@ const AssistantResponse = ({ response, onRegenerate }) => {
       console.error('Failed to copy:', err);
     }
   };
+
+  // Generate intelligent follow-up suggestions based on sources
+  const followUpSuggestions = useMemo(() => {
+    if (!response.sources || response.sources.length === 0) {
+      return [];
+    }
+
+    // Extract topics from sources
+    const topics = new Set();
+    response.sources.forEach(source => {
+      if (source.section) {
+        topics.add(source.section);
+      }
+    });
+
+    // Generate contextual follow-ups
+    const suggestions = [];
+    
+    // Topic-based suggestions
+    if (topics.has('Security') || response.answer.toLowerCase().includes('security')) {
+      suggestions.push('How does LinuxONE ensure data security?');
+      suggestions.push('What encryption features does LinuxONE provide?');
+    }
+    
+    if (topics.has('Performance') || response.answer.toLowerCase().includes('performance')) {
+      suggestions.push('How does LinuxONE optimize workload performance?');
+      suggestions.push('What are the performance benchmarks for LinuxONE?');
+    }
+    
+    if (response.answer.toLowerCase().includes('ai') || response.answer.toLowerCase().includes('artificial intelligence')) {
+      suggestions.push('What AI frameworks are supported on LinuxONE?');
+      suggestions.push('How do I deploy AI models on LinuxONE?');
+    }
+    
+    if (response.answer.toLowerCase().includes('container') || response.answer.toLowerCase().includes('kubernetes')) {
+      suggestions.push('How does LinuxONE support containerization?');
+      suggestions.push('What are the benefits of running containers on LinuxONE?');
+    }
+
+    // Default suggestions if none matched
+    if (suggestions.length === 0) {
+      suggestions.push('What are the key features of LinuxONE?');
+      suggestions.push('How does LinuxONE compare to other platforms?');
+      suggestions.push('What workloads are best suited for LinuxONE?');
+    }
+
+    // Return up to 3 unique suggestions
+    return [...new Set(suggestions)].slice(0, 3);
+  }, [response]);
 
   const getConfidenceColor = (confidence) => {
     switch (confidence) {
@@ -255,6 +306,19 @@ const AssistantResponse = ({ response, onRegenerate }) => {
                 }}
               />
             </Box>
+
+            {/* Answer Context - Why This Answer? */}
+            <AnswerContext
+              sources={response.sources || []}
+              confidence={response.confidence}
+            />
+
+            {/* Follow-up Suggestions */}
+            <FollowUpSuggestions
+              suggestions={followUpSuggestions}
+              onSuggestionClick={onFollowUpClick}
+              loading={false}
+            />
           </>
         ) : (
           <SourcesPanel sources={response.sources || []} />

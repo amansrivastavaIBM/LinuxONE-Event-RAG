@@ -8,7 +8,9 @@ import {
   CssBaseline,
   ThemeProvider,
   createTheme,
-  CircularProgress
+  CircularProgress,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { CpuChipIcon } from '@heroicons/react/24/solid';
 import Composer from './components/Composer';
@@ -16,6 +18,7 @@ import UserMessage from './components/UserMessage';
 import AssistantResponse from './components/AssistantResponse';
 import NoEvidenceState from './components/NoEvidenceState';
 import SystemErrorState from './components/SystemErrorState';
+import ExplorePage from './components/ExplorePage';
 import { queryKnowledgeBase } from './services/api';
 
 // Professional Design System
@@ -134,6 +137,7 @@ const theme = createTheme({
 });
 
 function App() {
+  const [activeView, setActiveView] = useState('ask'); // ask, explore, compare
   const [uiState, setUiState] = useState('idle'); // idle, searching, answered, no_sources, error
   const [currentQuery, setCurrentQuery] = useState('');
   const [response, setResponse] = useState(null);
@@ -144,6 +148,7 @@ function App() {
     setUiState('searching');
     setError(null);
     setResponse(null);
+    setActiveView('ask'); // Switch to ask view when querying
 
     try {
       const data = await queryKnowledgeBase(query, null, filters);
@@ -190,7 +195,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-        {/* Simplified Header */}
+        {/* Header with Navigation */}
         <AppBar
           position="static"
           elevation={0}
@@ -200,7 +205,7 @@ function App() {
           }}
         >
           <Toolbar sx={{ py: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
               <Box
                 sx={{
                   width: 32,
@@ -218,6 +223,34 @@ function App() {
                 LinuxONE Knowledge Assistant
               </Typography>
             </Box>
+            
+            {/* Navigation Tabs */}
+            <Tabs
+              value={activeView}
+              onChange={(e, newValue) => setActiveView(newValue)}
+              sx={{
+                minHeight: '48px',
+                '& .MuiTab-root': {
+                  minHeight: '48px',
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  fontSize: '0.9375rem',
+                  color: 'rgba(255,255,255,0.7)',
+                  '&.Mui-selected': {
+                    color: 'white',
+                    fontWeight: 600,
+                  },
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: 'white',
+                  height: '3px',
+                },
+              }}
+            >
+              <Tab label="Ask" value="ask" />
+              <Tab label="Explore" value="explore" />
+              <Tab label="Compare" value="compare" disabled />
+            </Tabs>
           </Toolbar>
         </AppBar>
 
@@ -225,13 +258,20 @@ function App() {
         <Container
           maxWidth={false}
           sx={{
-            maxWidth: '900px',
+            maxWidth: activeView === 'explore' ? '1200px' : '900px',
             pt: isConversationMode ? 3 : 5,
             pb: 4,
           }}
         >
-          {/* Empty State - Hero */}
-          {uiState === 'idle' && (
+          {/* Explore View */}
+          {activeView === 'explore' && (
+            <ExplorePage
+              onQuerySubmit={handleQuery}
+            />
+          )}
+
+          {/* Ask View - Empty State - Hero */}
+          {activeView === 'ask' && uiState === 'idle' && (
             <>
               <Box sx={{ mb: 4, textAlign: 'center' }}>
                 <Typography
@@ -260,8 +300,8 @@ function App() {
             </>
           )}
 
-          {/* Conversation Mode */}
-          {isConversationMode && (
+          {/* Ask View - Conversation Mode */}
+          {activeView === 'ask' && isConversationMode && (
             <>
               {/* User Message */}
               <UserMessage message={currentQuery} />
@@ -295,7 +335,11 @@ function App() {
               {/* Assistant Response */}
               {uiState === 'answered' && response && (
                 <Box sx={{ mb: 3 }}>
-                  <AssistantResponse response={response} onRegenerate={handleRegenerate} />
+                  <AssistantResponse
+                    response={response}
+                    onRegenerate={handleRegenerate}
+                    onFollowUpClick={handleSuggestionClick}
+                  />
                 </Box>
               )}
 

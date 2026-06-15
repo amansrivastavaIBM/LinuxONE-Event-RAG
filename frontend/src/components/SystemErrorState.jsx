@@ -45,14 +45,50 @@ const SystemErrorState = ({ error, onRetry }) => {
         variant="body2"
         sx={{
           color: '#7F1D1D',
-          mb: 3,
+          mb: 2,
           maxWidth: '480px',
-          margin: '0 auto 24px',
+          margin: '0 auto 16px',
           lineHeight: 1.6,
         }}
       >
-        {error || 'Please try again in a moment.'}
+        {error || 'An unexpected error occurred while processing your request.'}
       </Typography>
+
+      {/* Helpful Tips */}
+      <Box
+        sx={{
+          mb: 3,
+          p: 2,
+          backgroundColor: '#FEE2E2',
+          borderRadius: '10px',
+          maxWidth: '480px',
+          margin: '0 auto 24px',
+          textAlign: 'left',
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
+            color: '#991B1B',
+            mb: 1,
+            fontSize: '0.875rem',
+          }}
+        >
+          What you can do:
+        </Typography>
+        <Box component="ul" sx={{ m: 0, pl: 2.5, color: '#7F1D1D' }}>
+          <Typography component="li" variant="body2" sx={{ mb: 0.5, fontSize: '0.8125rem' }}>
+            Try again in a moment
+          </Typography>
+          <Typography component="li" variant="body2" sx={{ mb: 0.5, fontSize: '0.8125rem' }}>
+            Simplify your question
+          </Typography>
+          <Typography component="li" variant="body2" sx={{ fontSize: '0.8125rem' }}>
+            Check your internet connection
+          </Typography>
+        </Box>
+      </Box>
 
       {onRetry && (
         <Button

@@ -53,14 +53,50 @@ const NoEvidenceState = ({ onSuggestionClick }) => {
         variant="body2"
         sx={{
           color: 'text.secondary',
-          mb: 3,
+          mb: 2,
           maxWidth: '480px',
-          margin: '0 auto 24px',
+          margin: '0 auto 16px',
           lineHeight: 1.6,
         }}
       >
         I couldn't find relevant information in the indexed LinuxONE documentation for that question.
       </Typography>
+
+      {/* Helpful Tips */}
+      <Box
+        sx={{
+          mb: 3,
+          p: 2,
+          backgroundColor: '#F8F9FA',
+          borderRadius: '10px',
+          maxWidth: '480px',
+          margin: '0 auto 24px',
+          textAlign: 'left',
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
+            color: 'text.primary',
+            mb: 1,
+            fontSize: '0.875rem',
+          }}
+        >
+          💡 Try these tips:
+        </Typography>
+        <Box component="ul" sx={{ m: 0, pl: 2.5, color: 'text.secondary' }}>
+          <Typography component="li" variant="body2" sx={{ mb: 0.5, fontSize: '0.8125rem' }}>
+            Rephrase your question with different keywords
+          </Typography>
+          <Typography component="li" variant="body2" sx={{ mb: 0.5, fontSize: '0.8125rem' }}>
+            Be more specific about what you're looking for
+          </Typography>
+          <Typography component="li" variant="body2" sx={{ fontSize: '0.8125rem' }}>
+            Use technical terms from LinuxONE documentation
+          </Typography>
+        </Box>
+      </Box>
 
       <Box>
         <Typography
@@ -72,7 +108,7 @@ const NoEvidenceState = ({ onSuggestionClick }) => {
             fontSize: '0.875rem',
           }}
         >
-          Try one of these instead:
+          Or explore these topics:
         </Typography>
         <Box
           sx={{
